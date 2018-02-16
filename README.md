@@ -1,10 +1,21 @@
 A breakable toy for testing out docker and tools/applications with docker.
 
-Currently used to set up brubeck -> graphite (-> carbon -> graphite-web)
+Currently used to test a stats setup:
 
-To run:
+```
+ruby app generating "stats"
+-> brubeck
+-> (graphite)
+   carbon
+    -> whisper
+    -> graphite-web
+```
+
+with graphite-web served on nginx+gunicorn.
+
+## Run it
 
 * clone brubeck, carbon, graphite-web, and whisper into this directory
 * run `docker build -t harbor . && docker run -it -p 8080:8080 harbor`
 * access the web interface for metrics with `http://localhost:8080/render?target=ship`
-
+  * if `docker exec`'d into the container, you can also view stats with `whisper-fetch.py --pretty --from=10 /opt/graphite/storage/whisper/ship.wsp | tail -n 25`
