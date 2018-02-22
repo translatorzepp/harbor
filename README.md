@@ -4,14 +4,28 @@ Currently used to test a stats setup:
 
 ```
 ruby app generating "stats"
--> brubeck
--> (graphite)
-   carbon
-    -> whisper
-    -> graphite-web
+-> veneur
+  split
+  -> datadog (via veneur's datadog "sink")
+  -> brubeck (via veneur's "forward_address")
+    -> (graphite)
+      carbon
+       -> whisper
+       -> graphite-web
 ```
 
 with graphite-web served on nginx+gunicorn.
+
+docker containers:
+
+  harbor                veneur
++---------+           +---------+
+| ruby app|   ---->   | veneur  |
+| brubeck |   <----   |         |
+| carbon  |           +---------+
+| whisper |
++---------+
+
 
 ## Run it
 
@@ -20,6 +34,6 @@ with graphite-web served on nginx+gunicorn.
    * `git clone git@github.com:graphite-project/carbon.git`
    * `git clone git@github.com:graphite-project/graphite-web.git`
    * `git clone git@github.com:graphite-project/whisper.git`
-* run `docker build -t harbor . && docker run -it -p 8080:8080 harbor`
+* run `./start_with_network.sh`
+  * this will create a docker network bridge, build the harbor and veneur images, and run the two containers, linking them to the network
 * access the web interface for metrics with `http://localhost:8080/render?target=ship`
-  * if `docker exec`'d into the container, you can also view stats with `whisper-fetch.py --pretty --from=10 /opt/graphite/storage/whisper/ship.wsp | tail -n 25`
